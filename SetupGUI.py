@@ -28,7 +28,7 @@ ent_path.insert(0, exe_path)
 ent_path.grid(row=3, column=1, columnspan=4, padx=3, pady=3)
 
 def exe_path_callback():
-    filename = askopenfilename(initialdir = f'C:\\Users\\{os.getlogin()}\\Documents\\RealmOfTheMadGod\\Production', title = "Find your RotMG Client")
+    filename = askopenfilename(initialdir = f'C:/Users/{os.getlogin()}/Documents/RealmOfTheMadGod/Production', title = "Find your RotMG Client")
     ent_path.delete(0, 'end')
     ent_path.insert(0, filename)
     exe_path = filename
@@ -40,8 +40,6 @@ shortcut_name = 'test'
 
 def write_shortcut():
     shortcut_name = ent_name.get()
-    if not os.path.exists('generated_shortcuts'):
-        os.makedirs('generated_shortcuts')
     with open(f'C:/Users/{os.getlogin()}/Desktop/{shortcut_name}.bat', 'w') as f:
         f.write('@ECHO OFF\n')
         f.write(f'set ROTMG_EMAIL={ent_email.get()}\n')

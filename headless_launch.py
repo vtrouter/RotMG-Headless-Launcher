@@ -14,16 +14,17 @@ def base64_encode(s: str) -> str:
 def get_device_token():
     c = wmi.WMI()
 
-    base_board_serial = c.Win32_BaseBoard()[0].SerialNumber
-    bios_serial = c.Win32_BIOS()[0].SerialNumber
-    os_serial = c.Win32_OperatingSystem()[0].SerialNumber
-
-    concat = base_board_serial + bios_serial + os_serial
+    concat = ''
+    for obj in c.query("SELECT * FROM Win32_BaseBoard"):
+        concat += obj.SerialNumber if obj.SerialNumber else ''
+    for obj in c.query("SELECT * FROM Win32_BIOS"):
+        concat += obj.SerialNumber if obj.SerialNumber else ''
+    for obj in c.query("SELECT * FROM Win32_OperatingSystem"):
+        concat += obj.SerialNumber if obj.SerialNumber else ''
 
     m = hashlib.sha1()
     m.update(concat.encode())
-    device_token = m.hexdigest()
-    return device_token
+    return m.hexdigest()
 
 
 def send_login_request(email, password, device_token):
@@ -54,7 +55,8 @@ def parse_response(response_xml):
 
     return encoded_token, encoded_timestamp
 
-default_exe = f'C:\\Users\\{os.getlogin()}\\Documents\\RealmOfTheMadGod\\Production\\RotMG Exalt.exe'
+
+default_exe = f'C:/Users/{os.getlogin()}/Documents/RealmOfTheMadGod/Production/RotMG Exalt.exe'
 email = os.getenv("ROTMG_EMAIL")
 password = os.getenv("ROTMG_PASSWORD")
 clientToken = get_device_token()
@@ -65,4 +67,5 @@ encoded_email = base64_encode(email)
 
 exe_path = os.getenv('ROTMG_PATH', default_exe)
 data = f'data:{{platform:Deca,guid:{encoded_email},token:{encoded_token},tokenTimestamp:{encoded_timestamp},tokenExpiration:MTMwMDAwMA==,env:4}}'
+os.chdir(exe_path[0:exe_path.rfind('/')])
 subprocess.Popen([exe_path, data])
